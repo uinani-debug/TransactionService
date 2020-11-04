@@ -24,25 +24,37 @@ namespace TransactionLibrary.API.Services
         {
             using (var c = Connection)
             {
-                c.Open();
-                var p2 = new DynamicParameters();
+                try
+                {
+                    c.Open();
+                    var p = new DynamicParameters();
+                    p.Add("accountNumber", req.AccountIdentifier, DbType.String, ParameterDirection.Input);
 
-                p2.Add("accountNumber", req.AccountIdentifier, DbType.String, ParameterDirection.Input);
-                p2.Add("transactionAmount", req.TransactionAmount, DbType.Double, ParameterDirection.Input);
-                p2.Add("transactionDate", req.TransactionDate, DbType.DateTime, ParameterDirection.Input);
-                p2.Add("transactionTowards", req.TransactionTowards, DbType.String, ParameterDirection.Input);
-                p2.Add("transactionType", req.TransactionType, DbType.String, ParameterDirection.Input);
-                //p2.Add("availableBalance", req.AvailableBalance, DbType.Double, ParameterDirection.Input);
-                //Update Transaction Table
-                //string updateQuery = "update tb_mae_mort_account_trans set [account_identifier]=@accountNumber, [available_balance] = @availableBalance" +
-                //     "[transaction_type] =@transactionType,[transaction_amount] = @transactionAmount, [transaction_towards]= @transactionTowards" +
-                //     " [transaction_date] =@transactionDate where account_identifier= @accountNumber";
-                //
-                string query = " insert into tb_mae_mort_account_trans (account_identifier,transaction_type,transaction_amount,transaction_towards,transaction_date) values(@accountNumber, @transactionType, @transactionAmount, @transactionTowards, @transactionDate)";
+                    // Select from Accounts Table
+                    string selectQuery = "select [available_balance] from [tb_mae_mort_account] where account_identifier= @accountNumber";
+                    var selectedAccounts = c.Query<double>(selectQuery, p).FirstOrDefault();
 
-                var updatedAccounts = c.Query(query, p2);
+                    var p2 = new DynamicParameters();
 
+                    p2.Add("accountNumber", req.AccountIdentifier, DbType.String, ParameterDirection.Input);
+                    p2.Add("transactionAmount", req.TransactionAmount, DbType.Double, ParameterDirection.Input);
+                    p2.Add("transactionDate", req.TransactionDate, DbType.DateTime, ParameterDirection.Input);
+                    p2.Add("transactionTowards", req.TransactionTowards, DbType.String, ParameterDirection.Input);
+                    p2.Add("transactionType", req.TransactionType, DbType.String, ParameterDirection.Input);
+                    p2.Add("availableBalance", selectedAccounts, DbType.Double, ParameterDirection.Input);
+                    //Update Transaction Table
+                    //string updateQuery = "update tb_mae_mort_account_trans set [account_identifier]=@accountNumber, [available_balance] = @availableBalance" +
+                    //     "[transaction_type] =@transactionType,[transaction_amount] = @transactionAmount, [transaction_towards]= @transactionTowards" +
+                    //     " [transaction_date] =@transactionDate where account_identifier= @accountNumber";
+                    //
+                    string query = " insert into tb_mae_mort_account_trans (account_identifier,transaction_type,available_balance,transaction_amount,transaction_towards,transaction_date) values(@accountNumber, @transactionType, @availableBalance, @transactionAmount, @transactionTowards, @transactionDate)";
 
+                    var updatedAccounts = c.Query(query, p2);
+
+                }catch(Exception e)
+                {
+
+                }
                 //p.Add("accountNumber", req.AccountIdentifier, DbType.String, ParameterDirection.Input);
                 ////p.Add("transactionAmount", req.TransactionAmount, DbType.Double, ParameterDirection.Input);
                 ////p.Add("transactionDate", req.TransactionDate, DbType.DateTime, ParameterDirection.Input);

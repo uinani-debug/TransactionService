@@ -49,6 +49,24 @@ namespace TransactionLibrary.API.Controllers
             return Accepted();
         }
 
+        [Route("test")]
+        [HttpGet]
+        public ActionResult<string> test()
+        {
+            var TransactionRequest = new Transaction
+            {
+                AccountIdentifier = "54678947",
+                //AvailableBalance = Request.Creditor.,
+                TransactionAmount = 1000,
+                TransactionDate = DateTime.Now,
+                TransactionTowards = "Test Available balance",
+                TransactionType = "Debit"
+            };
+
+            _TransactionLibraryRepository.TransactionDetails(TransactionRequest);
+
+            return Accepted();
+        }
 
         private void subscribeDebitTransactionEvent()
         {
